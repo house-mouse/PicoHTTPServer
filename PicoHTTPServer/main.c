@@ -298,30 +298,10 @@ static void main_task(__unused void *params)
 	vTaskDelete(NULL);
 }
 
-xSemaphoreHandle s_PrintfSemaphore;
-
-void debug_printf(const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	xSemaphoreTake(s_PrintfSemaphore, portMAX_DELAY);
-	vprintf(format, args);
-	va_end(args);
-	xSemaphoreGive(s_PrintfSemaphore);
-}
-
-void debug_write(const void *data, int size)
-{
-	xSemaphoreTake(s_PrintfSemaphore, portMAX_DELAY);
-	_write(1, data, size);
-	xSemaphoreGive(s_PrintfSemaphore);
-}
-
 int main(void)
 {
 	stdio_init_all();
 	TaskHandle_t task;
-	s_PrintfSemaphore = xSemaphoreCreateMutex();
 	xTaskCreate(main_task, "MainThread", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, &task);
 	vTaskStartScheduler();
 }
